@@ -17,8 +17,8 @@ async function submit() {
   <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100 via-sky-50 to-blue-100 px-4">
     <div class="w-full max-w-sm rounded-2xl border border-sky-200 bg-white/90 p-8 shadow-xl shadow-sky-200/60 backdrop-blur-sm">
       <div class="mb-6 text-center">
-        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-sky-100 text-2xl">
-          🔒
+        <div class="mx-auto mb-4 flex justify-center">
+          <AppLogo size="lg" />
         </div>
         <h1 class="text-2xl font-bold tracking-tight text-slate-800">
           Magical Wardrobe

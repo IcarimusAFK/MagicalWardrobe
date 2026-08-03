@@ -14,6 +14,10 @@ export default defineNuxtConfig({
     head: {
       title: 'Magical Wardrobe',
       meta: [{ name: 'description', content: 'Dressing connecté — inventaire personnel de vêtements' }],
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/logo.png' },
+        { rel: 'apple-touch-icon', href: '/logo.png' },
+      ],
     },
   },
 })

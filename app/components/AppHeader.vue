@@ -5,7 +5,8 @@ const { lock, isDemoMode } = useDressingLock()
 <template>
   <header class="border-b border-sky-200 bg-white/80 backdrop-blur-sm">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-      <NuxtLink to="/" class="group flex items-center gap-2">
+      <NuxtLink to="/" class="group flex items-center gap-3">
+        <AppLogo size="sm" />
         <span class="text-xl font-bold tracking-tight text-sky-800 group-hover:text-sky-600">
           Magical Wardrobe
         </span>
