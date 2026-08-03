@@ -11,8 +11,14 @@ import outfitRoutes from './routes/outfits.js';
 
 const fastify = Fastify({ logger: true });
 
+function parseAllowedOrigins() {
+  const raw = process.env.FRONTEND_URL || '*'
+  if (raw === '*') return true
+  return raw.split(',').map((o) => o.trim()).filter(Boolean)
+}
+
 await fastify.register(cors, {
-  origin: process.env.FRONTEND_URL || '*',
+  origin: parseAllowedOrigins(),
 });
 
 await fastify.register(multipart, {

@@ -49,4 +49,18 @@ Code d'accès par défaut : `magical2026` (variable `NUXT_PUBLIC_DRESSING_ACCESS
 | GET | `/types` | Types de vêtements |
 | GET | `/outfits` | Tenues enregistrées |
 | POST | `/outfits` | Enregistrer une tenue |
-| POST | `/upload/presign` | URL présignée R2 pour upload photo |
+| POST | `/upload` | Upload photo via l'API → R2 |
+| GET | `/upload/status` | Vérifier la config R2 |
+
+## Déploiement Render (gratuit)
+
+Le projet nécessite **2 Web Services** Render (plan free) depuis le même repo :
+
+| Service | Build | Start |
+|---|---|---|
+| `magical-wardrobe-api` | `npm install` | `npm run start:api` |
+| `magical-wardrobe-web` | `npm install && npm run build:web` | `npm run start:web` |
+
+Voir `render.yaml` pour un déploiement Blueprint automatique.
+
+> **Important** : `NUXT_PUBLIC_*` doivent être définies **avant le build** du service web sur Render.
