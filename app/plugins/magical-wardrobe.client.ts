@@ -1,11 +1,15 @@
 export default defineNuxtPlugin(() => {
-  const { isUnlocked, isReady } = useDressingLock()
-  const { fetchAll, initialized } = useDressing()
+  const { isUnlocked, isReady, isDemoMode } = useDressingLock()
+  const { fetchAll, loadDemoData, initialized } = useDressing()
 
   watch(
-    [isUnlocked, isReady],
-    async ([unlocked, ready]) => {
-      if (ready && unlocked && !initialized.value) {
+    [isUnlocked, isReady, isDemoMode],
+    async ([unlocked, ready, demo]) => {
+      if (!ready || !unlocked) return
+      if (demo) {
+        if (!initialized.value) loadDemoData()
+      }
+      else if (!initialized.value) {
         await fetchAll()
       }
     },

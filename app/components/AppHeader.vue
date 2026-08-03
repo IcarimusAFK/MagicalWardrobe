@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { lock } = useDressingLock()
+const { lock, isDemoMode } = useDressingLock()
 </script>
 
 <template>
@@ -8,6 +8,12 @@ const { lock } = useDressingLock()
       <NuxtLink to="/" class="group flex items-center gap-2">
         <span class="text-xl font-bold tracking-tight text-sky-800 group-hover:text-sky-600">
           Magical Wardrobe
+        </span>
+        <span
+          v-if="isDemoMode"
+          class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700"
+        >
+          Démo
         </span>
       </NuxtLink>
       <nav class="flex items-center gap-4">
@@ -33,6 +39,12 @@ const { lock } = useDressingLock()
           🔒
         </button>
       </nav>
+    </div>
+    <div
+      v-if="isDemoMode"
+      class="border-t border-amber-200 bg-amber-50 px-4 py-2 text-center text-xs text-amber-800"
+    >
+      Mode démonstration — les données sont fictives et ne sont pas enregistrées sur le serveur.
     </div>
   </header>
 </template>

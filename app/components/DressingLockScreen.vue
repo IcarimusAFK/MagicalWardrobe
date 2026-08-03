@@ -1,19 +1,15 @@
 <script setup lang="ts">
 const code = ref('')
 const isSubmitting = ref(false)
-const { unlock, error } = useDressingLock()
+const { unlock, enterDemo, error } = useDressingLock()
 
 async function submit() {
-  if (!code.value.trim()) {
-    return
-  }
+  if (!code.value.trim()) return
   isSubmitting.value = true
   await nextTick()
-  unlock(code.value)
+  const ok = unlock(code.value)
   isSubmitting.value = false
-  if (error.value) {
-    code.value = ''
-  }
+  if (!ok) code.value = ''
 }
 </script>
 
@@ -60,6 +56,26 @@ async function submit() {
           Déverrouiller
         </button>
       </form>
+
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-sky-200" />
+        </div>
+        <div class="relative flex justify-center text-xs uppercase">
+          <span class="bg-white/90 px-2 text-slate-400">ou</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="w-full rounded-lg border border-sky-300 bg-sky-50 py-3 text-sm font-semibold text-sky-700 transition-colors hover:border-sky-400 hover:bg-sky-100"
+        @click="enterDemo"
+      >
+        ✨ Explorer la démo
+      </button>
+      <p class="mt-2 text-center text-xs text-slate-400">
+        17 vêtements fictifs · filtres · tenues · sans connexion API
+      </p>
     </div>
   </div>
 </template>

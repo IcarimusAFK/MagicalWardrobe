@@ -15,9 +15,11 @@ import {
   mapTypeFromApi,
   mapVetementFromApi,
 } from '~/utils/apiMappers'
+import { getDemoDressingData } from '~/data/demo-dressing'
 
 export function useDressing() {
   const api = useApi()
+  const { isDemoMode } = useDressingLock()
 
   const vetements = useState<Vetement[]>('dressing-vetements', () => [])
   const pickedOutfits = useState<PickedOutfit[]>('dressing-picked-outfits', () => [])
@@ -32,7 +34,33 @@ export function useDressing() {
     return vetementsList.filter((v) => tagIds.every((id) => v.tagIds.includes(id)))
   }
 
+  function loadDemoData() {
+    loading.value = true
+    error.value = null
+    const demo = getDemoDressingData()
+    vetements.value = demo.vetements
+    tags.value = demo.tags
+    types.value = demo.types
+    pickedOutfits.value = demo.pickedOutfits
+    initialized.value = true
+    loading.value = false
+  }
+
+  function reset() {
+    vetements.value = []
+    tags.value = []
+    types.value = []
+    pickedOutfits.value = []
+    initialized.value = false
+    loading.value = false
+    error.value = null
+  }
+
   async function fetchAll(force = false) {
+    if (isDemoMode.value) {
+      if (!initialized.value || force) loadDemoData()
+      return
+    }
     if (initialized.value && !force) return
     loading.value = true
     error.value = null
@@ -59,6 +87,12 @@ export function useDressing() {
   }
 
   async function addVetement(vetement: NewVetement): Promise<Vetement> {
+    if (isDemoMode.value) {
+      const nextId = Math.max(0, ...vetements.value.map((v) => v.id_vetement)) + 1
+      const created: Vetement = { ...vetement, id_vetement: nextId }
+      vetements.value.unshift(created)
+      return created
+    }
     const created = await api.post<ApiVetement>('/vetements', {
       id_type: vetement.id_type,
       label: vetement.label,
@@ -72,6 +106,12 @@ export function useDressing() {
   }
 
   async function addPickedOutfit(outfit: NewPickedOutfit): Promise<PickedOutfit> {
+    if (isDemoMode.value) {
+      const nextId = Math.max(0, ...pickedOutfits.value.map((o) => o.id_outfit)) + 1
+      const created: PickedOutfit = { ...outfit, id_outfit: nextId }
+      pickedOutfits.value.unshift(created)
+      return created
+    }
     const created = await api.post<ApiPickedOutfit>('/outfits', outfit)
     const mapped = mapPickedOutfitFromApi(created)
     pickedOutfits.value.unshift(mapped)
@@ -81,6 +121,9 @@ export function useDressing() {
   async function fetchVetementById(id: number): Promise<Vetement | undefined> {
     const cached = vetements.value.find((v) => v.id_vetement === id)
     if (cached) return cached
+
+    if (isDemoMode.value) return undefined
+
     try {
       const raw = await api.get<ApiVetement>(`/vetements/${id}`)
       const mapped = mapVetementFromApi(raw)
@@ -120,6 +163,9 @@ export function useDressing() {
     loading,
     error,
     initialized,
+    isDemoMode,
+    loadDemoData,
+    reset,
     fetchAll,
     addVetement,
     addPickedOutfit,
