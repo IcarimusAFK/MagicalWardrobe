@@ -1,15 +1,14 @@
 # Render Blueprint — Magical Wardrobe
 # Déploie 2 Web Services gratuits depuis le même repo GitHub.
-# Dashboard Render > New > Blueprint > connecter le repo
 
 services:
-  # ── API Fastify (Supabase + R2) ──────────────────────────────────────────
+  # ── API Fastify (Supabase + R2) — pas de Nuxt ───────────────────────────
   - type: web
     name: magical-wardrobe-api
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: npm install
+    buildCommand: npm install --omit=dev --ignore-scripts
     startCommand: npm run start:api
     healthCheckPath: /health
     envVars:
@@ -36,7 +35,7 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: npm install && npm run build:web
+    buildCommand: npm install --include=dev && nuxt prepare && npm run build:web
     startCommand: npm run start:web
     envVars:
       - key: NODE_ENV

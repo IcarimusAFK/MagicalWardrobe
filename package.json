@@ -11,8 +11,7 @@
     "build:api": "node --check src/server.js",
     "start:api": "node src/server.js",
     "start:web": "node .output/server/index.mjs",
-    "preview": "nuxt preview --port 3001",
-    "postinstall": "nuxt prepare"
+    "preview": "nuxt preview --port 3001"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.750.0",
@@ -26,13 +25,13 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.5",
     "vue": "^3.5.40",
-    "vue-router": "^5.2.0"
+    "vue-router": "^5.2.0",
+    "@nuxtjs/tailwindcss": "^6.14.0"
   },
   "devDependencies": {
-    "@nuxtjs/tailwindcss": "^6.14.0",
     "concurrently": "^9.1.2"
   },
   "engines": {
-    "node": ">=20"
+    "node": "20.x"
   }
 }
