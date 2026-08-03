@@ -2,7 +2,7 @@
 import type { Vetement } from '~/types/dressing'
 
 const route = useRoute()
-const { vetements, tags, types, filterByTags, getTypeLabel, getTagsForVetement } = useDressing()
+const { vetements, tags, types, loading, error, fetchAll, filterByTags, getTypeLabel, getTagsForVetement } = useDressing()
 
 const selectedTagIds = ref<number[]>([])
 const selectedTypeId = ref<number | null>(null)
@@ -36,7 +36,6 @@ const filteredVetements = computed(() => {
 
 const totalCount = computed(() => vetements.value.length)
 const displayedCount = computed(() => filteredVetements.value.length)
-
 const isSelectingForOutfit = computed(() => activeSlotTypeId.value !== null)
 
 function onPickVetement(vetement: Vetement) {
@@ -66,12 +65,28 @@ function isPickedInOutfit(vetement: Vetement): boolean {
         Mon dressing
       </h1>
       <p class="text-slate-500">
-        {{ displayedCount }} / {{ totalCount }} vêtement{{ totalCount > 1 ? 's' : '' }} affiché{{ displayedCount > 1 ? 's' : '' }}
+        <template v-if="loading">Chargement depuis l'API…</template>
+        <template v-else>
+          {{ displayedCount }} / {{ totalCount }} vêtement{{ totalCount > 1 ? 's' : '' }} affiché{{ displayedCount > 1 ? 's' : '' }}
+        </template>
       </p>
     </div>
 
-    <div class="flex flex-col gap-8 xl:flex-row xl:items-start">
-      <!-- Colonne gauche : filtres + grille -->
+    <div
+      v-if="error"
+      class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+    >
+      {{ error }}
+      <button type="button" class="ml-2 underline" @click="fetchAll(true)">
+        Réessayer
+      </button>
+    </div>
+
+    <div v-if="loading" class="flex justify-center py-24">
+      <div class="h-10 w-10 animate-spin rounded-full border-4 border-sky-200 border-t-sky-500" />
+    </div>
+
+    <div v-else class="flex flex-col gap-8 xl:flex-row xl:items-start">
       <div class="min-w-0 flex-1">
         <div class="mb-8 space-y-6 rounded-xl border border-sky-200 bg-white/80 p-6 shadow-sm">
           <TagFilterBar v-model:selected-tag-ids="selectedTagIds" :tags="tags" />
@@ -123,7 +138,6 @@ function isPickedInOutfit(vetement: Vetement): boolean {
         </div>
       </div>
 
-      <!-- Colonne droite : composition de tenue -->
       <aside class="w-full shrink-0 xl:sticky xl:top-4 xl:w-80">
         <div class="rounded-xl border border-sky-200 bg-white/80 p-5 shadow-sm">
           <OutfitBuilder

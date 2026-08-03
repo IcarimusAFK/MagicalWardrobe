@@ -1,15 +1,22 @@
 <script setup lang="ts">
+import type { Vetement } from '~/types/dressing'
+
 const route = useRoute()
 const id = computed(() => Number(route.params.id))
 
-const { getVetementById, getTypeLabel, getTagsForVetement } = useDressing()
+const { fetchVetementById, getTypeLabel, getTagsForVetement } = useDressing()
 
-const vetement = computed(() => getVetementById(id.value))
+const { data: vetement, pending } = await useAsyncData(
+  () => `vetement-${id.value}`,
+  () => fetchVetementById(id.value),
+  { watch: [id], server: false },
+)
+
 const typeLabel = computed(() =>
   vetement.value ? getTypeLabel(vetement.value.id_type) : '',
 )
 const vetementTags = computed(() =>
-  vetement.value ? getTagsForVetement(vetement.value) : [],
+  vetement.value ? getTagsForVetement(vetement.value as Vetement) : [],
 )
 
 function goToTagFilter(tagId: number) {
@@ -18,7 +25,11 @@ function goToTagFilter(tagId: number) {
 </script>
 
 <template>
-  <div v-if="vetement" class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+  <div v-if="pending" class="flex justify-center py-24">
+    <div class="h-10 w-10 animate-spin rounded-full border-4 border-sky-200 border-t-sky-500" />
+  </div>
+
+  <div v-else-if="vetement" class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
     <NuxtLink
       to="/"
       class="mb-6 inline-flex items-center gap-1 text-sm text-slate-500 transition-colors hover:text-sky-700"

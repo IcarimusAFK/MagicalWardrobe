@@ -37,13 +37,6 @@ export const TYPE_TO_SLOT: Record<number, OutfitSlotKey> = {
   5: 'id_veste',
 }
 
-export interface DressingData {
-  typesVetement: TypeVetement[]
-  tags: Tag[]
-  vetements: Vetement[]
-  picked_outfit: PickedOutfit[]
-}
-
 export type NewVetement = Omit<Vetement, 'id_vetement'>
 
 export type NewPickedOutfit = Omit<PickedOutfit, 'id_outfit'>

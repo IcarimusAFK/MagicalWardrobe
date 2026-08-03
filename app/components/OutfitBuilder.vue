@@ -45,8 +45,7 @@ function validateOutfit() {
     id_chaussure: props.selection[4] ?? null,
     id_veste: props.selection[5] ?? null,
   }
-  addPickedOutfit(outfit)
-  emit('validate')
+  addPickedOutfit(outfit).then(() => emit('validate'))
 }
 
 function formatDate(date: string): string {

@@ -1,75 +1,52 @@
-# Nuxt Minimal Starter
+# Magical Wardrobe
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Dressing connecté — frontend Nuxt + API Fastify + Supabase.
 
-## Setup
+## Prérequis
 
-Make sure to install dependencies:
+- Node.js 20+
+- Projet Supabase initialisé
+- Fichier `.env` (copier depuis `.env.example`)
+
+## Configuration Supabase
+
+1. Dans Supabase → **SQL Editor**, exécuter le fichier `supabase/schema.sql`
+2. Récupérer la **Connection string** (mode Transaction pooler, port 6543) dans Project Settings → Database
+3. Coller l'URL dans `DATABASE_URL` du `.env`
+
+## Lancement
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+Cela démarre simultanément :
+- **API** Magical Wardrobe sur `http://localhost:3000`
+- **Frontend** Nuxt sur `http://localhost:3001`
 
-Build the application for production:
+Code d'accès par défaut : `magical2026` (variable `NUXT_PUBLIC_DRESSING_ACCESS_CODE`).
 
-```bash
-# npm
-npm run build
+## Scripts
 
-# pnpm
-pnpm build
+| Commande | Description |
+|---|---|
+| `npm run dev` | API + frontend en parallèle |
+| `npm run dev:api` | API seule |
+| `npm run dev:web` | Frontend seul |
+| `npm run build` | Build production Nuxt |
+| `npm run start:api` | Démarrer l'API en production |
 
-# yarn
-yarn build
+## Endpoints API
 
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+| Méthode | Route | Description |
+|---|---|---|
+| GET | `/health` | Santé de l'API |
+| GET | `/vetements` | Liste des vêtements (`?tags=1,2&type=1`) |
+| GET | `/vetements/:id` | Détail d'un vêtement |
+| POST | `/vetements` | Créer un vêtement |
+| GET | `/tags` | Liste des tags |
+| GET | `/types` | Types de vêtements |
+| GET | `/outfits` | Tenues enregistrées |
+| POST | `/outfits` | Enregistrer une tenue |
+| POST | `/upload/presign` | URL présignée R2 pour upload photo |

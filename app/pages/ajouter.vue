@@ -5,7 +5,8 @@ import {
   type Answers,
 } from '~/composables/useTagGenerator'
 
-const { types, tags, addVetement } = useDressing()
+const { types, tags, addVetement, loading: dressingLoading } = useDressing()
+const { uploadPhoto } = useApi()
 const router = useRouter()
 
 const WIZARD_STEPS = ['Infos', 'Questionnaire', 'Résumé'] as const
@@ -13,6 +14,8 @@ const QUESTION_STEPS = 5
 
 const wizardStep = ref(0)
 const questionStep = ref(1)
+const saving = ref(false)
+const saveError = ref<string | null>(null)
 
 const form = reactive({
   label: '',
@@ -31,12 +34,13 @@ const answers = reactive<Answers>({
 })
 
 const photoPreview = ref<string | null>(null)
+const selectedPhotoFile = ref<File | null>(null)
 
 function onPhotoChange(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (file) {
+    selectedPhotoFile.value = file
     photoPreview.value = URL.createObjectURL(file)
-    form.pic_path = photoPreview.value
   }
 }
 
@@ -54,7 +58,7 @@ function nextWizardStep() {
   if (wizardStep.value === 1 && questionStep.value === QUESTION_STEPS) {
     const generated = generateTagsFromAnswers(answers)
     form.description = generated.description
-    form.tagIds = labelsToTagIds(generated.tagLabels, tags)
+    form.tagIds = labelsToTagIds(generated.tagLabels, tags.value)
   }
   wizardStep.value++
 }
@@ -67,15 +71,38 @@ function prevWizardStep() {
   wizardStep.value = Math.max(0, wizardStep.value - 1)
 }
 
-function save() {
-  addVetement({
-    label: form.label.trim(),
-    id_type: form.id_type,
-    description: form.description,
-    pic_path: form.pic_path || 'https://placehold.co/300x400/1a1a1a/888888?text=Nouveau',
-    tagIds: [...form.tagIds],
-  })
-  router.push('/')
+async function save() {
+  saving.value = true
+  saveError.value = null
+  try {
+    let picPath = form.pic_path
+    if (selectedPhotoFile.value) {
+      try {
+        picPath = await uploadPhoto(selectedPhotoFile.value)
+      }
+      catch {
+        picPath = 'https://placehold.co/300x400/bae6fd/0369a1?text=Magical+Wardrobe'
+      }
+    }
+    else if (!picPath) {
+      picPath = 'https://placehold.co/300x400/bae6fd/0369a1?text=Magical+Wardrobe'
+    }
+
+    await addVetement({
+      label: form.label.trim(),
+      id_type: form.id_type,
+      description: form.description,
+      pic_path: picPath,
+      tagIds: [...form.tagIds],
+    })
+    await router.push('/')
+  }
+  catch (e) {
+    saveError.value = e instanceof Error ? e.message : 'Erreur lors de l\'enregistrement'
+  }
+  finally {
+    saving.value = false
+  }
 }
 </script>
 
@@ -89,7 +116,13 @@ function save() {
       <span v-if="questionProgress" class="text-slate-400">({{ questionProgress }})</span>
     </p>
 
-    <!-- Barre de progression -->
+    <div
+      v-if="saveError"
+      class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+    >
+      {{ saveError }}
+    </div>
+
     <div class="mb-8 flex gap-2">
       <div
         v-for="(_, i) in WIZARD_STEPS"
@@ -101,7 +134,6 @@ function save() {
       />
     </div>
 
-    <!-- Étape 0 : Infos de base -->
     <div v-if="wizardStep === 0" class="space-y-6">
       <div class="space-y-2">
         <label for="label" class="text-sm font-medium text-slate-600">Nom du vêtement</label>
@@ -119,6 +151,7 @@ function save() {
         <select
           id="type"
           v-model.number="form.id_type"
+          :disabled="dressingLoading"
           class="w-full rounded-lg border border-sky-200 bg-white px-4 py-3 text-slate-800 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-300"
         >
           <option v-for="type in types" :key="type.id_type" :value="type.id_type">
@@ -145,7 +178,6 @@ function save() {
       </div>
     </div>
 
-    <!-- Étape 1 : Questionnaire -->
     <QuestionnaireStep
       v-else-if="wizardStep === 1"
       :step="questionStep"
@@ -153,7 +185,6 @@ function save() {
       @update:answers="Object.assign(answers, $event)"
     />
 
-    <!-- Étape 2 : Résumé -->
     <div v-else-if="wizardStep === 2" class="space-y-6">
       <div class="rounded-lg border border-sky-200 bg-white/80 p-4">
         <p class="text-sm text-slate-500">Nom</p>
@@ -171,7 +202,6 @@ function save() {
       />
     </div>
 
-    <!-- Navigation -->
     <div class="mt-10 flex justify-between">
       <button
         v-if="wizardStep > 0 || questionStep > 1"
@@ -187,7 +217,7 @@ function save() {
         v-if="wizardStep < WIZARD_STEPS.length - 1"
         type="button"
         :disabled="wizardStep === 0 && !isBasicValid"
-        class="rounded-lg border border-sky-400 bg-sky-200 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
+        class="rounded-lg border border-sky-400 bg-sky-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-40"
         @click="nextWizardStep"
       >
         {{ wizardStep === 1 && questionStep < QUESTION_STEPS ? 'Question suivante' : 'Suivant' }}
@@ -196,10 +226,11 @@ function save() {
       <button
         v-else
         type="button"
-        class="rounded-lg border border-sky-400 bg-sky-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-sky-600"
+        :disabled="saving"
+        class="rounded-lg border border-sky-400 bg-sky-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-sky-600 disabled:opacity-50"
         @click="save"
       >
-        Enregistrer
+        {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
       </button>
     </div>
   </div>
