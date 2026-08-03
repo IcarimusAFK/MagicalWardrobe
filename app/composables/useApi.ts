@@ -22,17 +22,17 @@ export function useApi() {
     return $fetch<T>(url(path), { method: 'DELETE' })
   }
 
+  /** Envoie la photo à l'API qui la transfère vers R2 (pas de CORS R2 côté navigateur). */
   async function uploadPhoto(file: File): Promise<string> {
-    const { uploadUrl, publicUrl } = await post<{ uploadUrl: string; publicUrl: string }>(
-      '/upload/presign',
-      { fileName: file.name, fileType: file.type },
-    )
-    await fetch(uploadUrl, {
-      method: 'PUT',
-      body: file,
-      headers: { 'Content-Type': file.type },
+    const formData = new FormData()
+    formData.append('photo', file)
+
+    const result = await $fetch<{ publicUrl: string }>(url('/upload'), {
+      method: 'POST',
+      body: formData,
     })
-    return publicUrl
+
+    return result.publicUrl
   }
 
   return { baseUrl, url, get, post, put, del, uploadPhoto }

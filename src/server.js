@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import multipart from '@fastify/multipart';
 import 'dotenv/config';
 
 import { sequelize } from './models/index.js';
@@ -12,6 +13,12 @@ const fastify = Fastify({ logger: true });
 
 await fastify.register(cors, {
   origin: process.env.FRONTEND_URL || '*',
+});
+
+await fastify.register(multipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 Mo max par photo
+  },
 });
 
 await fastify.register(vetementRoutes);

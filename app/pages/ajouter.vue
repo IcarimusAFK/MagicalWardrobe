@@ -77,12 +77,7 @@ async function save() {
   try {
     let picPath = form.pic_path
     if (selectedPhotoFile.value) {
-      try {
-        picPath = await uploadPhoto(selectedPhotoFile.value)
-      }
-      catch {
-        picPath = 'https://placehold.co/300x400/bae6fd/0369a1?text=Magical+Wardrobe'
-      }
+      picPath = await uploadPhoto(selectedPhotoFile.value)
     }
     else if (!picPath) {
       picPath = 'https://placehold.co/300x400/bae6fd/0369a1?text=Magical+Wardrobe'
